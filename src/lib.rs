@@ -17,9 +17,10 @@
 //! UTF-8 used as 8-bit codepage for non-Windows system.
 
 #![warn(missing_docs)]
+pub mod posix;
 #[cfg(windows)]
 pub mod windows;
-pub mod posix;
+use std::ffi::OsStr;
 use std::io::Result;
 
 /// Converter between string and multibyte encoding.
@@ -28,7 +29,7 @@ pub trait Encoder {
     fn to_string(self: &Self, data: &[u8]) -> Result<String>;
 
     /// Convert from string to bytes.
-    fn to_bytes(self: &Self, data: &str) -> Result<Vec<u8>>;
+    fn to_bytes<S: AsRef<OsStr>>(self: &Self, data: S) -> Result<Vec<u8>>;
 }
 
 /// Text convertation encoding.
@@ -61,10 +62,9 @@ impl Encoder for Encoding {
     /// Convert from bytes to string.
     fn to_string(self: &Self, data: &[u8]) -> Result<String> {
         windows::EncoderCodePage(self.codepage()).to_string(data)
-
     }
     /// Convert from bytes to string.
-    fn to_bytes(self: &Self, data: &str) -> Result<Vec<u8>> {
+    fn to_bytes<S: AsRef<OsStr>>(self: &Self, data: S) -> Result<Vec<u8>> {
         windows::EncoderCodePage(self.codepage()).to_bytes(data)
     }
 }
@@ -74,10 +74,9 @@ impl Encoder for Encoding {
     /// Convert from bytes to string.
     fn to_string(self: &Self, data: &[u8]) -> Result<String> {
         posix::EncoderUtf8.to_string(data)
-
     }
     /// Convert from bytes to string.
-    fn to_bytes(self: &Self, data: &str) -> Result<Vec<u8>> {
+    fn to_bytes<S: AsRef<OsStr>>(self: &Self, data: S) -> Result<Vec<u8>> {
         posix::EncoderUtf8.to_bytes(data)
     }
 }
